@@ -1,0 +1,15 @@
+<div class="ss-studio">
+  <p class="ss-eyebrow">SCORMSTACK</p><h2>Create here. Teach in Open edX.</h2>
+  <p>Edit your module in ScormStack, then import a version into Studio. Publish the unit when it is ready for learners.</p>
+  <div class="ss-toolbar"><button type="button" data-action="connect">Connect ScormStack</button><button type="button" data-action="refresh">Refresh connection</button><button type="button" data-action="disconnect">Disconnect</button><span class="ss-connection"></span></div>
+  <label>Activity title<input name="display_name" value="{{ block.display_name }}" maxlength="255"></label>
+  <div class="ss-course-picker"><button type="button" data-action="courses">Browse my modules</button><select name="courses" aria-label="ScormStack modules"><option value="">Choose a module</option></select><button type="button" data-action="previous">Previous</button><button type="button" data-action="next">Next</button></div>
+  <label>ScormStack course ID<input name="course_id" value="{{ block.course_id }}" placeholder="Course UUID"></label>
+  <div class="ss-toolbar"><input name="new_title" aria-label="New module title" placeholder="New module title"><button type="button" data-action="create">Create a module</button><a class="ss-edit" target="_blank" rel="noopener noreferrer" hidden>Open editor ↗</a></div>
+  <div class="ss-toolbar"><label>Player height<input name="height" type="number" min="300" max="1600" value="{{ block.height }}"></label><label><input name="has_score" type="checkbox" {% if block.has_score %}checked{% endif %}> Send scores to the gradebook</label></div>
+  <div class="ss-package"><strong>Installed version</strong><p>{% if block.package %}{{ block.package.title }} · {{ block.package.version }}<br>{{ block.package.imported_at }}<br><small>{{ block.package.revision }}</small>{% else %}No package imported yet.{% endif %}</p></div>
+  <div class="ss-toolbar"><button type="button" data-action="publish">Export and import into Studio</button></div>
+  <details><summary>Import an existing SCORM ZIP</summary><p>Single-SCO SCORM 1.2 or 2004. Import trusted content only.</p><input type="file" name="package" accept=".zip"><button type="button" data-action="upload">Import ZIP</button></details>
+  <p class="ss-status" role="status" aria-live="polite"></p>
+  <div class="ss-toolbar"><button type="button" data-action="save">Save and close</button><button type="button" data-action="close">Close</button></div>
+</div>

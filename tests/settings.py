@@ -1,0 +1,10 @@
+SECRET_KEY = "test-only-not-a-deployment-key"
+INSTALLED_APPS = ["django.contrib.auth", "django.contrib.contenttypes", "django.contrib.sessions", "scormstack_xblock"]
+DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}}
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+USE_TZ = True
+ROOT_URLCONF = "scormstack_xblock.urls"
+ALLOWED_HOSTS = ["testserver"]
+MIDDLEWARE = ["django.contrib.sessions.middleware.SessionMiddleware", "django.contrib.auth.middleware.AuthenticationMiddleware"]
+STORAGES = {"default": {"BACKEND": "django.core.files.storage.InMemoryStorage"}}
+SCORMSTACK = {"STUDIO_ORIGIN": "https://studio.example.org"}

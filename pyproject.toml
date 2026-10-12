@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scormstack-xblock"
+version = "0.1.0"
+description = "Author in ScormStack and deliver versioned SCORM packages in Open edX"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "XBlock>=5,<7", "Django>=4.2,<5.3", "web-fragments>=2,<5",
+  "defusedxml>=0.7,<1", "requests>=2.32,<3", "cryptography>=42",
+]
+
+[project.urls]
+Repository = "https://github.com/moocitfrance/scormstack-xblock"
+Issues = "https://github.com/moocitfrance/scormstack-xblock/issues"
+
+[project.optional-dependencies]
+s3 = ["django-storages[s3]>=1.14,<2"]
+test = ["pytest>=8", "pytest-django>=4.8"]
+
+[project.entry-points."xblock.v1"]
+scormstack = "scormstack_xblock.block:ScormStackXBlock"
+
+[project.entry-points."lms.djangoapp"]
+scormstack_xblock = "scormstack_xblock.apps:ScormStackConfig"
+
+[project.entry-points."cms.djangoapp"]
+scormstack_xblock = "scormstack_xblock.apps:ScormStackConfig"
+
+[tool.setuptools.packages.find]
+include = ["scormstack_xblock*"]
+
+[tool.setuptools.package-data]
+scormstack_xblock = ["static/*", "templates/*"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+pythonpath = ["."]
+testpaths = ["tests"]
