@@ -8,6 +8,7 @@ import pytest
 from webob import Request
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
+from xblock.exceptions import DisallowedFileError
 from opaque_keys.edx.keys import UsageKey
 
 from scormstack_xblock.block import ScormStackXBlock
@@ -95,6 +96,14 @@ def test_media_ranges_and_stale_asset_rejection(block):
 def test_templates_render(block):
     assert "Connect ScormStack" in block.studio_view().content
     assert "ss-frame" in block.student_view().content
+
+
+def test_runtime_resource_is_public_but_package_internals_are_not():
+    with ScormStackXBlock.open_local_resource("static/runtime.js") as resource:
+        assert b"ScormStackEngine" in resource.read()
+    for path in ["block.py", "templates/player.html", "static/../block.py"]:
+        with pytest.raises(DisallowedFileError):
+            ScormStackXBlock.open_local_resource(path)
 
 
 def test_publication_flow_and_change_of_selection(block):

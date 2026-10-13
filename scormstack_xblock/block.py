@@ -39,6 +39,7 @@ def author_handler(fn):
 @XBlock.needs("user")
 @XBlock.wants("studio_user_permissions")
 class ScormStackXBlock(CompletableXBlockMixin, XBlock):
+    public_dir = "static"
     display_name = String(default="ScormStack", scope=Scope.settings)
     course_id = String(default="", scope=Scope.settings)
     package = Dict(default={}, scope=Scope.content)
