@@ -5,6 +5,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const source = path.join(__dirname, '../scormstack_xblock/static');
+const jquery = process.env.SCORMSTACK_JQUERY || require.resolve('jquery/dist/jquery.js');
 const state = {a: {}, b: {}}, saves = [], failures = [];
 let failOnce = true;
 const html = `<!doctype html><html><body><script src="/player.js"></script>
@@ -16,8 +17,13 @@ document.getElementById('save').onclick=()=>{api.LMSSetValue('cmi.suspend_data',
 </script></body></html>`;
 const server = http.createServer(async (req, res) => {
   const base = `http://${req.headers.host}`;
+  if (req.url === '/studio') {
+    res.setHeader('Content-Type', 'text/html');
+    return res.end('<!doctype html><html><head><script src="/jquery.js"></script></head><body></body></html>');
+  }
+  if (req.url === '/jquery.js') { res.setHeader('Content-Type', 'application/javascript'); return res.end(fs.readFileSync(jquery)); }
   if (req.url === '/') { res.setHeader('Content-Type','text/html'); return res.end(html); }
-  if (req.url === '/runtime.js' || req.url === '/player.js') { res.setHeader('Content-Type','application/javascript'); return res.end(fs.readFileSync(path.join(source,req.url.slice(1)))); }
+  if (['/runtime.js', '/player.js', '/studio.js'].includes(req.url)) { res.setHeader('Content-Type','application/javascript'); return res.end(fs.readFileSync(path.join(source,req.url.slice(1)))); }
   if (req.url.startsWith('/content/')) { res.setHeader('Content-Type','text/html'); return res.end(content(req.url.split('/')[2])); }
   if (req.url.startsWith('/api/')) {
     let body=''; for await (const chunk of req) body+=chunk;
@@ -38,6 +44,23 @@ const server = http.createServer(async (req, res) => {
     try {
       const page=await browser.newPage();
       page.on('pageerror', e=>failures.push(e.message));
+      await page.goto(`http://127.0.0.1:${server.address().port}/studio`);
+      const injected = await page.evaluate(async () => {
+        try {
+          // Match Studio XBlockView.loadResource's HTML parsing and globalEval.
+          for (const name of ['player', 'studio']) {
+            const data = await (await fetch('/' + name + '.js')).text();
+            window.jQuery('head').append('<script>' + data + '</script>');
+          }
+          window.jQuery('body').append('<div id="empty"><button class="ss-save">Save</button><button class="ss-fullscreen">Fullscreen</button><div class="ss-frame"></div><p class="ss-status"></p></div>');
+          window.ScormStackPlayer({}, document.getElementById('empty'), {height: 400});
+          window.jQuery('head').append('<script>window.nextComponentLoaded = true;</script>');
+          return {player: typeof window.ScormStackPlayer, studio: typeof window.ScormStackStudio,
+            nextComponent: window.nextComponentLoaded, status: document.querySelector('.ss-status').textContent};
+        } catch (error) { return {error: error.name + ': ' + error.message}; }
+      });
+      assert.deepEqual(injected, {player: 'function', studio: 'function', nextComponent: true, status: 'No published package yet.'});
+      console.log(browserType.name()+': Studio inline resources, empty block and following component passed');
       await page.goto(`http://127.0.0.1:${server.address().port}`);
       const a=page.frameLocator('#a .ss-frame > iframe').frameLocator('iframe');
       const b=page.frameLocator('#b .ss-frame > iframe').frameLocator('iframe');

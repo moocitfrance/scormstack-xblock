@@ -47,7 +47,8 @@ function ScormStackPlayer(runtime, element, settings) {
       // Local package code is trusted instructor content, like a native SCORM activity.
       // One outer frame per block prevents window.API collisions between activities.
       const bootstrap = JSON.stringify(session).replaceAll("<", "\\u003c");
-      frame.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><style>html,body,iframe{margin:0;width:100%;height:100%;border:0;display:block}</style></head><body><script src="${escape(settings.runtimeUrl)}"></script><script>
+      // Escape closing script tags because Studio embeds this resource as inline HTML.
+      frame.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><style>html,body,iframe{margin:0;width:100%;height:100%;border:0;display:block}</style></head><body><script src="${escape(settings.runtimeUrl)}"><\/script><script>
         const config = ${bootstrap};
         const engine = new ScormStackEngine({...config, changed(data, immediate) {
           parent.postMessage({type:"scormstack:state", data, immediate}, ${JSON.stringify(window.location.origin)});
@@ -56,7 +57,7 @@ function ScormStackPlayer(runtime, element, settings) {
         const content = document.createElement("iframe"); content.title = "Course content";
         content.allow = "fullscreen; autoplay"; content.src = config.launch; document.body.appendChild(content);
         window.addEventListener("pagehide", () => { if(engine.initialized) engine.changed(engine.snapshot(), true); });
-      </script></body></html>`;
+      <\/script></body></html>`;
       slot.appendChild(frame);
       announce(session.preview ? "Preview — results are not saved" : "Ready");
     } catch (error) { announce(error.message, true); }

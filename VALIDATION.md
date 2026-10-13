@@ -10,6 +10,9 @@
 - Chromium and Firefox smoke tests use two independent player frames. They
   verify failed-save retry and resume after reload, without global window.API
   leakage or uncaught JavaScript errors.
+- The same browsers exercise Studio's jQuery 2.2.4 inline resource injection,
+  including an empty ScormStack block and a subsequent component. This catches
+  HTML script termination errors that external JavaScript loading does not.
 - Django system checks and wheel packaging pass.
 
 Not yet verified: authentication against a real ScormStack deployment, live S3
